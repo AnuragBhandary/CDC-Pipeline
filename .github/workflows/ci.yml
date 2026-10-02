@@ -1,0 +1,41 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+      - run: uv sync --frozen
+      - run: uv run ruff check .
+      - run: uv run ruff format --check .
+      - run: uv run mypy
+
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+      - run: uv sync --frozen
+      - name: Start MySQL, Kafka, Kafka Connect (Debezium), PostgreSQL
+        run: docker compose up -d --wait
+      - name: Unit + end-to-end tests (snapshot, streaming, schema change, two crash points)
+        run: uv run pytest --cov --cov-report=term --cov-fail-under=85
+      - name: Benchmark smoke (50k events, schema change, a sink SIGKILLed mid-run, checksums)
+        run: uv run python bench/run_benchmark.py --events 50000 --rate 2000 --writers 4 --sinks 3
+             --schema-change-at 20000 --kill-at 30000 --label ci
+      - name: Logs on failure
+        if: failure()
+        run: |
+          docker compose logs connect --tail 200
+          tail -n 50 bench/out/*.log || true

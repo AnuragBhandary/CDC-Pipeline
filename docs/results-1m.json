@@ -1,0 +1,122 @@
+{
+  "run_id": "final27092",
+  "params": {
+    "events": 1000000,
+    "rate": 4000.0,
+    "writers": 8,
+    "sinks": 3,
+    "batch": 2000,
+    "customers": 20000,
+    "schema_change_at": 500000,
+    "kill_at": 700000,
+    "restart_after": 2.0,
+    "label": "final"
+  },
+  "seeded_rows_snapshot": 24001,
+  "load": {
+    "events": 1000021,
+    "seconds": 322.31,
+    "rate": 3102.6,
+    "schema_change_at_s": 153.82779717445374
+  },
+  "kill": {
+    "at_events": 700033,
+    "at_s": 221.5,
+    "victim": "sink-2",
+    "victim_pg_backend": [
+      [
+        "idle",
+        "COMMIT"
+      ],
+      [
+        "idle",
+        "COMMIT"
+      ]
+    ]
+  },
+  "events_by_op": {
+    "c": 436141,
+    "d": 20357,
+    "r": 24001,
+    "u": 542901
+  },
+  "sink_totals": {
+    "received": 1023400,
+    "deduped": 11276,
+    "applied": 1012124,
+    "stale": 0
+  },
+  "lag_ms": {
+    "p50": 89,
+    "p95": 141,
+    "p99": 183,
+    "p999": 2965,
+    "max": 3751,
+    "events_measured": 999399
+  },
+  "caught_up_after_marker_s": 0.4,
+  "schema_change_column_in_target": true,
+  "verify": [
+    {
+      "table": "cdc_markers",
+      "source_rows": 2,
+      "target_rows": 2,
+      "missing": 0,
+      "extra": 0,
+      "mismatched": 0,
+      "source_sha256": "d2b169890bfc96784c9eba836834562e1631b2075f9460acf11a61c72edf5408",
+      "target_sha256": "d2b169890bfc96784c9eba836834562e1631b2075f9460acf11a61c72edf5408",
+      "examples": [],
+      "ok": true
+    },
+    {
+      "table": "customers",
+      "source_rows": 40000,
+      "target_rows": 40000,
+      "missing": 0,
+      "extra": 0,
+      "mismatched": 0,
+      "source_sha256": "6cbc9e1235352970e1333bb85a13c37ec6b3742657448b1ba0992ea51fa9b027",
+      "target_sha256": "6cbc9e1235352970e1333bb85a13c37ec6b3742657448b1ba0992ea51fa9b027",
+      "examples": [],
+      "ok": true
+    },
+    {
+      "table": "order_items",
+      "source_rows": 284127,
+      "target_rows": 284127,
+      "missing": 0,
+      "extra": 0,
+      "mismatched": 0,
+      "source_sha256": "3847b56250e2192b795faec3635a23fab05993e6933b4984978677e73794c008",
+      "target_sha256": "3847b56250e2192b795faec3635a23fab05993e6933b4984978677e73794c008",
+      "examples": [],
+      "ok": true
+    },
+    {
+      "table": "orders",
+      "source_rows": 113933,
+      "target_rows": 113933,
+      "missing": 0,
+      "extra": 0,
+      "mismatched": 0,
+      "source_sha256": "ea13c8c9477b9325da54241b866168fe9a62fd7c28e6a49dd173c95dee78139e",
+      "target_sha256": "ea13c8c9477b9325da54241b866168fe9a62fd7c28e6a49dd173c95dee78139e",
+      "examples": [],
+      "ok": true
+    },
+    {
+      "table": "products",
+      "source_rows": 2000,
+      "target_rows": 2000,
+      "missing": 0,
+      "extra": 0,
+      "mismatched": 0,
+      "source_sha256": "d1c1a3a667ccc0c818c19315814279b65f8d7b93564cd7d8d207b934de2cdb5f",
+      "target_sha256": "d1c1a3a667ccc0c818c19315814279b65f8d7b93564cd7d8d207b934de2cdb5f",
+      "examples": [],
+      "ok": true
+    }
+  ],
+  "all_tables_match": true
+}
