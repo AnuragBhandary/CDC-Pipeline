@@ -75,6 +75,9 @@ database write: the full path.
 - p99 lag was 4.5 s with no failures at all: new tables' topics were only discovered on the
   default 5 s metadata refresh, and each new topic caused a stop-the-world rebalance. Fixed with a
   1 s refresh and the cooperative-sticky assignor; p99 went to under 0.5 s.
+- CI caught a sink dying on `ILLEGAL_GENERATION` when committing offsets right after a
+  rebalance. The idempotent apply is what makes ignoring it safe: the batch is in Postgres, and
+  the new owner of the partition replays it as no-ops. That's the design paying off.
 - The merge originally updated only the event's own columns, which left stale values when a
   table lost a column. With full row images, every target column has to be written.
 
