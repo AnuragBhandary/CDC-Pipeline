@@ -74,3 +74,8 @@ sinks.
    merge must write every target column.
 4. **Type changes went unnoticed**: the schema check compared column *names* only, so a widened
    DECIMAL failed at insert. Found by a unit test; the check now compares types and widens.
+5. **A sink died on a rejected offset commit** (found by CI). When the killed sink rejoined, the
+   group generation changed between another sink's PostgreSQL commit and its Kafka offset commit,
+   and the commit failed with `ILLEGAL_GENERATION`. The sink treated it as fatal. It's harmless by
+   design: the batch is already applied, and the partition's new owner replays it as no-ops. Fix:
+   tolerate rebalance-related commit errors (counted and logged), and keep everything else fatal.

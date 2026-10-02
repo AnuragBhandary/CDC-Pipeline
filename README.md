@@ -64,7 +64,7 @@ make verify           # wait for catch-up, compare every table, exit 1 on any di
 
 ## Tests
 
-`make test`: 28 tests, 93% coverage, against the real stack (CI runs it too, Debezium included):
+`make test`: 33 tests, 93% coverage, against the real stack (CI runs it too, Debezium included):
 
 - **decoder**: Connect logical types (exact decimals, microsecond timestamps, dates), deletes,
   tombstones, position ordering across binlog files

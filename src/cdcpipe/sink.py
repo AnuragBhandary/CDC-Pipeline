@@ -37,7 +37,7 @@ from typing import Any
 
 import orjson
 import psycopg
-from confluent_kafka import Consumer, KafkaError
+from confluent_kafka import Consumer, KafkaError, KafkaException
 from psycopg import sql
 
 from .config import Settings
@@ -254,6 +254,7 @@ class Stats:
     totals: BatchResult = field(default_factory=BatchResult)
     lag_ms: Counter[int] = field(default_factory=Counter)
     ops: Counter[str] = field(default_factory=Counter)
+    commit_failures: int = 0
 
     def record(self, events: list[Event], res: BatchResult, committed_at: float) -> None:
         self.batches += 1
@@ -292,6 +293,33 @@ class Stats:
 
 
 # ---------------------------------------------------------------------- consumer
+
+# Offset commits rejected because the group rebalanced since this batch was consumed. Harmless
+# by design: the batch is already in PostgreSQL, and the partition's new owner replays it from the
+# last committed offset, where every event is stale and skipped. (Found in CI: a restarted static
+# member bumped the group generation between another sink's database and offset commits.)
+REBALANCE_COMMIT_ERRORS = {
+    KafkaError.ILLEGAL_GENERATION,
+    KafkaError.REBALANCE_IN_PROGRESS,
+    KafkaError.UNKNOWN_MEMBER_ID,
+    KafkaError._NO_OFFSET,
+}
+
+
+def commit_offsets(c: Any, stats: Stats) -> bool:
+    """Commits consumed offsets; returns False if a rebalance made the commit moot."""
+    try:
+        c.commit(asynchronous=False)
+        return True
+    except KafkaException as ex:
+        if ex.args[0].code() not in REBALANCE_COMMIT_ERRORS:
+            raise
+        stats.commit_failures += 1
+        log.warning(
+            "offset commit lost to a rebalance (%s); the new owner replays it idempotently",
+            ex.args[0].str(),
+        )
+        return False
 
 
 def consumer_config(s: Settings, group: str, instance: str) -> dict[str, Any]:
@@ -371,7 +399,7 @@ def run(
             stats.record(events, res, committed)
             if res.applied:
                 _hang("after_pg_commit")
-            c.commit(asynchronous=False)
+            commit_offsets(c, stats)
     except BaseException:
         pg.rollback()
         raise
