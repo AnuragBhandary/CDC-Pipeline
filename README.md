@@ -83,5 +83,5 @@ make verify           # wait for catch-up, compare every table, exit 1 on any di
 src/cdcpipe/   decode (Debezium → typed rows), sink (consumer + Applier), connector (REST),
                workload (generator), verify (barrier + checksums), cli
 bench/         run_benchmark.py
-docs/          DESIGN, RESULTS (+ results-1m.json), INTERVIEW
+docs/          DESIGN, RESULTS (+ results-1m.json)
 ```
